@@ -1,0 +1,10 @@
+# Giấu cấu hình database cá nhân
+etl/db_config.py
+
+# Giấu file dữ liệu nặng
+data/*.xlsx
+data/*.csv
+
+# Giấu rác của Python
+__pycache__/
+.venv/
