@@ -8,3 +8,7 @@ data/*.csv
 # Giấu rác của Python
 __pycache__/
 .venv/
+
+etl/db_config.py
+__pycache__/
+*.xlsx
