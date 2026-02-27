@@ -16,12 +16,27 @@ def create_snapshot(source_name, fiscal_year, snapshot_date=None, version_tag="v
         conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor()
         
-        # Câu lệnh Insert đúng theo yêu cầu của thầy
+        # BƯỚC 1: Tìm source_id từ bảng dim_data_source dựa trên source_name
+        cursor.execute("SELECT source_id FROM dim_data_source WHERE source_name = %s", (source_name,))
+        result = cursor.fetchone()
+        
+        if result:
+            source_id = result[0]
+        else:
+            # Nếu chưa có nguồn này, tự động nạp mới vào bảng DIM
+            print(f"⚠️ Nguồn '{source_name}' chưa có trong danh mục. Đang tự động thêm...")
+            cursor.execute(
+                "INSERT INTO dim_data_source (source_name, source_type, provider) VALUES (%s, 'manual', 'Group3')",
+                (source_name,)
+            )
+            source_id = cursor.lastrowid
+
+        # BƯỚC 2: Insert vào bảng fact_data_snapshot dùng source_id (Đúng ý thầy)
         query = """
-        INSERT INTO fact_data_snapshot (source_name, fiscal_year, snapshot_date, version_tag)
+        INSERT INTO fact_data_snapshot (source_id, fiscal_year, snapshot_date, version_tag)
         VALUES (%s, %s, %s, %s)
         """
-        data = (source_name, fiscal_year, snapshot_date, version_tag)
+        data = (source_id, fiscal_year, snapshot_date, version_tag)
         
         cursor.execute(query, data)
         conn.commit()
@@ -29,7 +44,7 @@ def create_snapshot(source_name, fiscal_year, snapshot_date=None, version_tag="v
         snapshot_id = cursor.lastrowid
         print(f"✅ Đã tạo Snapshot thành công!")
         print(f"🆔 SNAPSHOT_ID: {snapshot_id}")
-        print(f"📋 Chi tiết: Nguồn: {source_name} | Năm tài chính: {fiscal_year} | Phiên bản: {version_tag}")
+        print(f"📋 Chi tiết: Nguồn: {source_name} (ID: {source_id}) | Năm: {fiscal_year}")
         
         return snapshot_id
 
@@ -42,9 +57,9 @@ def create_snapshot(source_name, fiscal_year, snapshot_date=None, version_tag="v
             conn.close()
 
 if __name__ == "__main__":
-    # Tùng có thể thay đổi thông tin ở đây trước khi chạy
+    # Tùng chạy thử với nguồn Vietstock
     create_snapshot(
-        source_name="Vietstock_Excel_Group3", 
+        source_name="Vietstock", 
         fiscal_year=2024, 
-        version_tag="Final_Draft"
+        version_tag="Final_Group3"
     )

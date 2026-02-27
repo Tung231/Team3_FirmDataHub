@@ -1,14 +1,14 @@
-# Giấu cấu hình database cá nhân
+# Bảo mật cấu hình database
 etl/db_config.py
 
-# Giấu file dữ liệu nặng
+# Giấu các file dữ liệu (Vì thầy sẽ xem trên máy bạn hoặc file PDF)
 data/*.xlsx
 data/*.csv
+outputs/*.csv
 
-# Giấu rác của Python
+# Giấu rác hệ thống và Python
 __pycache__/
+*.pyc
+.DS_Store
 .venv/
-
-etl/db_config.py
-__pycache__/
-*.xlsx
+.vscode/
