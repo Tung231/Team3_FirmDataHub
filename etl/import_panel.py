@@ -18,7 +18,7 @@ def clean_val(value):
         return None
 
 def import_panel_data(file_path, snapshot_id):
-    print(f"🚀 Leader Tùng đang nạp dữ liệu chuẩn 38 biến vào Database...")
+    print(f"🚀 Đang nạp dữ liệu chuẩn 38 biến vào Database...")
     conn = mysql.connector.connect(**DB_CONFIG)
     cursor = conn.cursor()
 

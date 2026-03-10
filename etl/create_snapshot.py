@@ -57,7 +57,7 @@ def create_snapshot(source_name, fiscal_year, snapshot_date=None, version_tag="v
             conn.close()
 
 if __name__ == "__main__":
-    # Tùng chạy thử với nguồn Vietstock
+    # Chạy thử với nguồn Vietstock
     create_snapshot(
         source_name="Vietstock", 
         fiscal_year=2024, 
