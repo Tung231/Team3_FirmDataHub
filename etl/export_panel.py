@@ -4,21 +4,27 @@ import os
 from db_config import DB_CONFIG
 
 def export_latest_panel():
-    print("🚀 Đang trích xuất Dataset Panel chuẩn theo thứ tự của thầy...")
+    print("🚀 Đang trích xuất Dataset Panel chuẩn theo thứ tự ưu tiên của nhóm...")
     
     conn = None
     try:
         conn = mysql.connector.connect(**DB_CONFIG)
         
-        # Truy vấn từ View đã sắp xếp
-        query = "SELECT * FROM vw_firm_panel_latest ORDER BY ticker, fiscal_year"
+        # 1. Truy vấn dữ liệu )
+        query = "SELECT * FROM vw_firm_panel_latest"
         df = pd.read_sql(query, conn)
         
         if df.empty:
             print("❌ LỖI: Không có dữ liệu! Hãy chạy import_panel.py trước.")
             return
 
-        # Đổi tên cột sang đúng yêu cầu của thầy (Professional Labels)
+        # 2. Định nghĩa thứ tự ưu tiên (Custom Order)
+        ticker_order = [
+            'VGS', 'CLH', 'LBM', 'QHD', 'MVB', 'BCF', 'HAP', 'MCP', 'IDI', 'LGC', 
+            'THG', 'CDC', 'LHC', 'LCG', 'TV2', 'TCL', 'ILB', 'STG', 'PVB', 'VNT'
+        ]
+
+        # 3. Đổi tên cột sang đúng yêu cầu 
         column_mapping = {
             'ticker': 'Ticker',
             'fiscal_year': 'Fiscal_Year',
@@ -62,11 +68,16 @@ def export_latest_panel():
             'net_ppe': 'Net plant, property and equipment',
             'firm_age': 'Firm age'
         }
-
-        # Áp dụng đổi tên
         df = df.rename(columns=column_mapping)
 
-        # Xuất file
+        # 4. THỰC HIỆN SẮP XẾP THEO THỨ TỰ RIÊNG
+        # Chuyển cột Ticker thành kiểu dữ liệu Categorical với thứ tự ticker_order
+        df['Ticker'] = pd.Categorical(df['Ticker'], categories=ticker_order, ordered=True)
+        
+        # Sắp xếp theo Ticker (ưu tiên list trên) và sau đó là Fiscal_Year
+        df = df.sort_values(by=['Ticker', 'Fiscal_Year'])
+
+        # 5. Xuất file
         output_dir = '../outputs'
         if not os.path.exists(output_dir): os.makedirs(output_dir)
         output_path = os.path.join(output_dir, 'panel_latest.csv')
@@ -74,7 +85,7 @@ def export_latest_panel():
         df.to_csv(output_path, index=False, encoding='utf-8-sig')
         
         print(f"✅ THÀNH CÔNG: Đã xuất {len(df)} dòng vào {output_path}")
-        print(f"📊 Tổng số cột: {len(df.columns)} (Ticker, Year + 39 biến)")
+        print(f"📊 Thứ tự Ticker đã được cố định theo danh sách 1-20.")
 
     except Exception as e:
         print(f"❌ Lỗi: {e}")
